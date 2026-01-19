@@ -1,4 +1,5 @@
-import {createSlice, type PayloadAction} from "@reduxjs/toolkit";
+import {createAsyncThunk, createSlice, type PayloadAction} from "@reduxjs/toolkit";
+import {getBooks as apiGetBooks} from '../api/index.ts';
 
 export type TBook = {
     id: string;
@@ -8,16 +9,21 @@ export type TBook = {
 
 type TBooksState = {
     books: Array<TBook>;
+    loading: boolean;
+    error: string | null;
 };
 
+export const getBooks = createAsyncThunk(
+    "books/getAll",
+    async () => {
+        return await apiGetBooks();
+    }
+)
+
 const initialState: TBooksState = {
-    books: [
-        {id: '1', title: 'книга1', author: 'автор1'},
-        {id: '2', title: 'книга2', author: 'автор1'},
-        {id: '3', title: 'книга3', author: 'автор1'},
-        {id: '4', title: 'книга4', author: 'автор1'},
-        {id: '5', title: 'книга5', author: 'автор1'},
-    ]
+    books: [],
+    loading: false,
+    error: null
 };
 
 const bookSlice = createSlice({
@@ -30,10 +36,24 @@ const bookSlice = createSlice({
         removeBook: (state: TBooksState, action: PayloadAction<string>) => {
             state.books = state.books.filter(b => b.id !== action.payload);
         }
+    },
+    extraReducers: (builder) => {
+        builder
+            .addCase(getBooks.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(getBooks.fulfilled, (state, action) => {
+                state.loading = false;
+                state.books = action.payload;
+            })
+            .addCase(getBooks.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.error.message || 'Ошибка';
+            })
     }
 });
 
-export const { addBook, removeBook } = bookSlice.actions;
+export const {addBook, removeBook} = bookSlice.actions;
 export const reducer = bookSlice.reducer;
 
-//AddBookForm

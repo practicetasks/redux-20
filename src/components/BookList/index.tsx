@@ -1,11 +1,16 @@
 import {useDispatch, useSelector} from "react-redux";
-import type {RootState} from "../../store/store.ts";
-import {removeBook} from "../../slices/slices.ts";
+import type {AppDispatch, RootState} from "../../store/store.ts";
+import {getBooks, removeBook} from "../../slices/slices.ts";
 import BookItem from "../BookItem";
+import {useEffect} from "react";
 
 const BookList = () => {
     const books = useSelector((state: RootState) => state.books);
-    const dispatch = useDispatch();
+    const dispatch: AppDispatch = useDispatch();
+
+    useEffect(() => {
+        dispatch(getBooks());
+    }, [dispatch])
 
     const handleRemove = (id: string) => {
         dispatch(removeBook(id));
