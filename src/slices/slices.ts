@@ -7,7 +7,7 @@ export type TBook = {
     author: string;
 };
 
-type TBooksState = {
+export type TBooksState = {
     books: Array<TBook>;
     loading: boolean;
     error: string | null;
@@ -19,6 +19,10 @@ export const getBooks = createAsyncThunk(
         return await apiGetBooks();
     }
 )
+
+// getBooks.pending
+// getBooks.fullfilled
+// getBooks.rejected
 
 const initialState: TBooksState = {
     books: [],
