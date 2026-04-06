@@ -1,14 +1,18 @@
-import BookList from "./components/BookList";
-import AddBookForm from "./components/AddBookForm";
+import {useSelector} from "react-redux";
+import type {RootState} from "./store/store.ts";
+import {selectTracks, type TrackModel} from "./slices/trackSlice.ts";
+import {Layout} from "./components/Layout/Layout.tsx";
+import {TrackList} from "./components/TrackList.tsx";
 
-function App() {
+const App = () => {
+    const tracks = useSelector<RootState, TrackModel[]>(selectTracks);
+
     return (
-        <>
-            <h1 className="text-3xl font-bold mb-8">Книги</h1>
-            <AddBookForm/>
-            <BookList/>
-        </>
-    )
-}
+        <Layout>
+            <TrackList tracks={tracks} />
+        </Layout>
+    );
+};
 
-export default App
+
+export default App;

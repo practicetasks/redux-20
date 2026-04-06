@@ -1,5 +1,7 @@
-import {describe, expect, it} from "vitest";
+import {describe, expect, it, vi, beforeEach} from "vitest";
 import {addBook, reducer, removeBook, getBooks, type TBook, type TBooksState} from "./slices.ts";
+import * as api from "../api/index.ts";
+import {configureStore} from "@reduxjs/toolkit";
 
 const initialState: TBooksState = {
     books: [],
@@ -92,3 +94,49 @@ describe('асинхронные экшены', () => {
     })
 })
 
+describe('getBooks thunk – мок тест', () => {
+    const createTestStore = () =>
+        configureStore({reducer: {books: reducer}});
+
+    beforeEach(() => {
+        vi.restoreAllMocks();
+    });
+
+    it('должен загрузить книги и записать их в стор', async () => {
+        const mockBooks: TBook[] = [
+            {id: '1', title: 'Мок книга 1', author: 'Автор 1'},
+            {id: '2', title: 'Мок книга 2', author: 'Автор 2'},
+        ];
+        vi.spyOn(api, 'getBooks').mockResolvedValue(mockBooks);
+
+        const store = createTestStore();
+        await store.dispatch(getBooks());
+
+        const state = store.getState().books;
+        expect(state.loading).toEqual(false);
+        expect(state.books).toEqual(mockBooks);
+        expect(state.error).toBeNull();
+    });
+
+    it('должен установить loading: true во время загрузки', () => {
+        vi.spyOn(api, 'getBooks').mockReturnValue(new Promise(() => {})); // никогда не резолвится
+
+        const store = createTestStore();
+        store.dispatch(getBooks());
+
+        const state = store.getState().books;
+        expect(state.loading).toEqual(true);
+    });
+
+    it('должен записать ошибку при rejected', async () => {
+        vi.spyOn(api, 'getBooks').mockRejectedValue(new Error('Network Error'));
+
+        const store = createTestStore();
+        await store.dispatch(getBooks());
+
+        const state = store.getState().books;
+        expect(state.loading).toEqual(false);
+        expect(state.error).toEqual('Network Error');
+        expect(state.books).toHaveLength(0);
+    });
+})

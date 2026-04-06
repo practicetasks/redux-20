@@ -46,10 +46,14 @@ const tracksSlice = createSlice({
                 track.isLiked = !track.isLiked;
             }
         },
+    },
+    selectors: {
+        selectTracks: (state) => state.tracks
     }
 });
 
 export const { toggleLike } = tracksSlice.actions;
+export const { selectTracks } = tracksSlice.selectors;
 
 export default tracksSlice.reducer;
 
